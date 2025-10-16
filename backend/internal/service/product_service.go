@@ -40,3 +40,12 @@ func (s *ProductService) GetProducts() []dto.ProductOut {
 
 	return result
 }
+
+func (s *ProductService) FindById(id int) (dto.ProductOut, error) {
+	repository := *s.p
+	product, err := repository.FindById(id)
+
+	result := dto.ProductOut{Name: product.Name, Price: product.Price}
+
+	return result, err
+}
