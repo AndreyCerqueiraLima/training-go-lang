@@ -14,19 +14,19 @@ func NewProductService(repo *repository.ProductRepository) *ProductService {
 	return &ProductService{p: repo}
 }
 
-func (s ProductService) CreateProduct(product dto.ProductIn) dto.ProductOut {
-	//repository := new(repository.ProductSQLRepository)
-	domainProduct := model.Product{}
-	domainProduct.Name = product.Name
-	domainProduct.Price = product.Price
-	//repository.Create(domainProduct)
+func (s *ProductService) CreateProduct(productIn dto.ProductIn) dto.ProductOut {
+	repository := *s.p
 	productOut := dto.ProductOut{}
-	productOut.Name = domainProduct.Name
-	productOut.Price = domainProduct.Price
+
+	product := model.Product{Name: productIn.Name, Price: productIn.Price}
+
+	if err := repository.Create(product); err != nil {
+		return productOut
+	}
 	return productOut
 }
 
-func (s ProductService) GetProducts() []dto.ProductOut {
+func (s *ProductService) GetProducts() []dto.ProductOut {
 	result := []dto.ProductOut{}
 	repository := repository.ProductSQLRepository{}
 	products, err := repository.FindAll()

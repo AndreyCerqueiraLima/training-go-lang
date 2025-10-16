@@ -1,14 +1,14 @@
 package server
 
 import (
-	"bjj-system/internal/presentation/api"
+	"bjj-system/internal/controllers"
 
 	"github.com/labstack/echo/v4"
 )
 
 func Start() {
 	e := echo.New()
-	e.POST("/products", api.CreateProduct)
-	e.GET("/products", api.GetProducts)
+	e.POST("/products", controllers.CreateProduct)
+	e.GET("/products", controllers.GetProducts)
 	e.Logger.Fatal(e.Start(":8080"))
 }

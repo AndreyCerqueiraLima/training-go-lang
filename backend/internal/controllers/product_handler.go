@@ -12,7 +12,7 @@ import (
 
 var validate = validator.New()
 var productRepository = repository.NewProductRepository()
-var productService = service.NewProductService(repository)
+var productService = service.NewProductService(&productRepository)
 
 func CreateProduct(c echo.Context) error {
 	product := dto.ProductIn{}
@@ -25,10 +25,10 @@ func CreateProduct(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	productOut := service.CreateProduct(product)
+	productOut := productService.CreateProduct(product)
 	return c.JSON(http.StatusOK, productOut)
 }
 
 func GetProducts(c echo.Context) error {
-	return c.JSON(http.StatusOK, service.GetProducts())
+	return c.JSON(http.StatusOK, productService.GetProducts())
 }
