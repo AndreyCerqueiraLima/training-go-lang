@@ -42,9 +42,19 @@ func (s *ProductService) GetProducts() []dto.ProductOut {
 
 func (s *ProductService) FindById(id int) (dto.ProductOut, error) {
 	repository := *s.rep
-	product, err := repository.FindById(id)
+	product, err := repository.FindById(uint32(id))
 
 	result := dto.ProductOut{Name: product.Name, Price: product.Price}
 
 	return result, err
+}
+
+func (s *ProductService) DeleteProduct(id int) (int, error) {
+	repository := *s.rep
+
+	if err := repository.Delete(uint32(id)); err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }

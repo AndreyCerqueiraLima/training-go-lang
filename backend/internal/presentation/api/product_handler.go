@@ -2,13 +2,26 @@ package api
 
 import (
 	"bjj-system/internal/model/dto"
+	"bjj-system/internal/repository"
 	"bjj-system/internal/service"
+	"database/sql"
 	"net/http"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
+
+func ExecProductHandler(e *echo.Echo, db *sql.DB) {
+	productRepository := repository.NewProductRepository(db)
+	productService := service.NewProductService(&productRepository)
+	productHandler := NewProductHandler(productService)
+
+	e.POST("/products", productHandler.CreateProduct)
+	e.GET("/products", productHandler.GetProducts)
+	e.GET("/products/:id", productHandler.GetProductById)
+	e.DELETE("/products/:id", productHandler.DeleteProduct)
+}
 
 type ProductHandler struct {
 	validator *validator.Validate
@@ -49,4 +62,16 @@ func (h ProductHandler) GetProductById(c echo.Context) error {
 	idConverted, _ := strconv.Atoi(id)
 	product, _ := h.ps.FindById(idConverted)
 	return c.JSON(http.StatusOK, product)
+}
+
+func (h ProductHandler) DeleteProduct(c echo.Context) error {
+	id := c.Param("id")
+	idConverted, _ := strconv.Atoi(id)
+	productId, err := h.ps.DeleteProduct(idConverted)
+
+	if err != nil {
+		return c.JSON(http.StatusNotFound, productId)
+	}
+
+	return c.JSON(http.StatusOK, productId)
 }

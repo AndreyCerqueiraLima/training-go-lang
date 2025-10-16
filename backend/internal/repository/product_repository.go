@@ -10,9 +10,10 @@ import (
 )
 
 type ProductRepository interface {
-	FindById(id int) (*model.Product, error)
+	FindById(id uint32) (*model.Product, error)
 	FindAll() ([]*model.Product, error)
 	Create(product *model.Product) error
+	Delete(id uint32) error
 }
 
 // implements ProductRepository
@@ -24,7 +25,7 @@ func NewProductRepository(db *sql.DB) ProductRepository {
 	return &ProductSQLRepository{db: db}
 }
 
-func (r *ProductSQLRepository) FindById(id int) (*model.Product, error) {
+func (r *ProductSQLRepository) FindById(id uint32) (*model.Product, error) {
 	var p model.Product
 	r.db.QueryRow("SELECT id,name,price from products where id = ?", id).Scan(&p.Id, &p.Name, &p.Price)
 
@@ -68,4 +69,19 @@ func (r *ProductSQLRepository) Create(p *model.Product) error {
 	p.Id = uint32(id)
 
 	return nil
+}
+
+func (r *ProductSQLRepository) Delete(id uint32) error {
+	result, err := r.db.Exec("DELETE products WHERE id = ?", id)
+
+	if err != nil {
+		return err
+	}
+	rowsAfectNumb, _ := result.RowsAffected()
+
+	if rowsAfectNumb > 0 {
+		return nil
+	}
+
+	return errors.New("nenhum registro deletado")
 }
