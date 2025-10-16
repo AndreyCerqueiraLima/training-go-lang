@@ -12,7 +12,7 @@ import (
 type ProductRepository interface {
 	FindById(id int) (*model.Product, error)
 	FindAll() ([]*model.Product, error)
-	Create(product model.Product) error
+	Create(product *model.Product) error
 }
 
 // implements ProductRepository
@@ -32,8 +32,6 @@ func (r *ProductSQLRepository) FindById(id int) (*model.Product, error) {
 		return nil, errors.New("não encontrado")
 	}
 
-	defer r.db.Close()
-
 	return &p, nil
 }
 
@@ -52,18 +50,22 @@ func (r *ProductSQLRepository) FindAll() ([]*model.Product, error) {
 		}
 		products = append(products, &p)
 	}
-	defer r.db.Close()
 
 	return products, nil
 }
 
-func (r *ProductSQLRepository) Create(p model.Product) error {
-	_, err2 := r.db.Exec("INSERT INTO products (name, price) VALUES (?, ?)", p.Name, p.Price)
-
-	if err2 != nil {
-		return err2
+func (r *ProductSQLRepository) Create(p *model.Product) error {
+	result, err := r.db.Exec("INSERT INTO products (name, price) VALUES (?, ?)", p.Name, p.Price)
+	if err != nil {
+		return err
 	}
-	defer r.db.Close()
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	p.Id = uint32(id)
 
 	return nil
 }

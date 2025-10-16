@@ -1,15 +1,25 @@
 package server
 
 import (
-	"bjj-system/internal/controllers"
+	"bjj-system/internal/presentation/api"
+	"bjj-system/internal/repository"
+	"bjj-system/internal/service"
+	"bjj-system/pkg/db_driver"
 
 	"github.com/labstack/echo/v4"
 )
 
 func Start() {
 	e := echo.New()
-	e.POST("/products", controllers.CreateProduct)
-	e.GET("/products", controllers.GetProducts)
-	e.GET("/products/:id", controllers.GetProductById)
+	db := db_driver.GetInstance()
+
+	productRepository := repository.NewProductRepository(db)
+	productService := service.NewProductService(&productRepository)
+	productHandler := api.NewProductHandler(productService)
+
+	e.POST("/products", productHandler.CreateProduct)
+	e.GET("/products", productHandler.GetProducts)
+	e.GET("/products/:id", productHandler.GetProductById)
+
 	e.Logger.Fatal(e.Start(":8080"))
 }

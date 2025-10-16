@@ -7,28 +7,27 @@ import (
 )
 
 type ProductService struct {
-	p *repository.ProductRepository
+	rep *repository.ProductRepository
 }
 
 func NewProductService(repo *repository.ProductRepository) *ProductService {
-	return &ProductService{p: repo}
+	return &ProductService{rep: repo}
 }
 
-func (s *ProductService) CreateProduct(productIn dto.ProductIn) dto.ProductOut {
-	repository := *s.p
-	productOut := dto.ProductOut{}
+func (s *ProductService) CreateProduct(productIn dto.ProductIn) (uint32, error) {
+	repository := *s.rep
 
 	product := model.Product{Name: productIn.Name, Price: productIn.Price}
 
-	if err := repository.Create(product); err != nil {
-		return productOut
+	if err := repository.Create(&product); err != nil {
+		return 0, err
 	}
-	return productOut
+	return product.Id, nil
 }
 
 func (s *ProductService) GetProducts() []dto.ProductOut {
+	repository := *s.rep
 	result := []dto.ProductOut{}
-	repository := repository.ProductSQLRepository{}
 	products, err := repository.FindAll()
 	if err != nil {
 		return result
@@ -42,7 +41,7 @@ func (s *ProductService) GetProducts() []dto.ProductOut {
 }
 
 func (s *ProductService) FindById(id int) (dto.ProductOut, error) {
-	repository := *s.p
+	repository := *s.rep
 	product, err := repository.FindById(id)
 
 	result := dto.ProductOut{Name: product.Name, Price: product.Price}
