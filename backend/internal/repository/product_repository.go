@@ -15,38 +15,33 @@ type ProductRepository interface {
 	Create(product model.Product) error
 }
 
+// implements ProductRepository
 type ProductSQLRepository struct {
-	sql.DB
+	db *sql.DB
 }
 
-func NewProductRepository() ProductRepository {
-	return &ProductSQLRepository{}
+func NewProductRepository(db *sql.DB) ProductRepository {
+	return &ProductSQLRepository{db: db}
 }
 
 func (r *ProductSQLRepository) FindById(id int) (*model.Product, error) {
-	db, err := sql.Open("mysql", "root:@tcp(localhost:3306)/training_test_go")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
 	var p model.Product
-	db.QueryRow("SELECT id,name,price from products where id = ?", id).Scan(&p.Id, &p.Name, &p.Price)
+	r.db.QueryRow("SELECT id,name,price from products where id = ?", id).Scan(&p.Id, &p.Name, &p.Price)
 
-	return &p, errors.New("não encontrado")
+	if p.Name == "" {
+		return nil, errors.New("não encontrado")
+	}
+
+	defer r.db.Close()
+
+	return &p, nil
 }
 
 func (r *ProductSQLRepository) FindAll() ([]*model.Product, error) {
-	db, err := sql.Open("mysql", "root:@tcp(localhost:3306)/training_test_go")
+	rows, err := r.db.Query("SELECT id, name, price FROM products")
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, err := db.Query("SELECT id, name, price FROM products")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer db.Close()
 
 	var products []*model.Product
 
@@ -57,21 +52,18 @@ func (r *ProductSQLRepository) FindAll() ([]*model.Product, error) {
 		}
 		products = append(products, &p)
 	}
+	defer r.db.Close()
+
 	return products, nil
 }
 
 func (r *ProductSQLRepository) Create(p model.Product) error {
-	db, err := sql.Open("mysql", "root:@tcp(localhost:3306)/training_test_go")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	_, err2 := db.Exec("INSERT INTO products (name, price) VALUES (?, ?)", p.Name, p.Price)
+	_, err2 := r.db.Exec("INSERT INTO products (name, price) VALUES (?, ?)", p.Name, p.Price)
 
 	if err2 != nil {
 		return err2
 	}
+	defer r.db.Close()
 
 	return nil
 }

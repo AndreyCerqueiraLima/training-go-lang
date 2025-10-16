@@ -4,6 +4,7 @@ import (
 	"bjj-system/internal/model/dto"
 	"bjj-system/internal/repository"
 	"bjj-system/internal/service"
+	"bjj-system/pkg/db_driver"
 	"net/http"
 	"strconv"
 
@@ -12,7 +13,8 @@ import (
 )
 
 var validate = validator.New()
-var productRepository = repository.NewProductRepository()
+var db = db_driver.GetInstance()
+var productRepository = repository.NewProductRepository(db)
 var productService = service.NewProductService(&productRepository)
 
 func CreateProduct(c echo.Context) error {

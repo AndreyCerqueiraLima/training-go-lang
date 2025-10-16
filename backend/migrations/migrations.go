@@ -5,11 +5,6 @@ package migrations
 // 	"os"
 
 // 	_ "github.com/go-sql-driver/mysql"
-// 	"github.com/golang-migrate/migrate"
-// 	migrateSql "github.com/golang-migrate/migrate/database/mysql"
-// 	"github.com/projects/sys-des/txn-routine/pkg/env"
-
-// 	_ "github.com/golang-migrate/migrate/source/file"
 // )
 
 // func Run(ctx context.Context) {
