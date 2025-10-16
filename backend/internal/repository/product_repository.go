@@ -72,11 +72,12 @@ func (r *ProductSQLRepository) Create(p *model.Product) error {
 }
 
 func (r *ProductSQLRepository) Delete(id uint32) error {
-	result, err := r.db.Exec("DELETE products WHERE id = ?", id)
+	result, err := r.db.Exec("DELETE FROM products WHERE id = ?", id)
 
 	if err != nil {
 		return err
 	}
+	
 	rowsAfectNumb, _ := result.RowsAffected()
 
 	if rowsAfectNumb > 0 {

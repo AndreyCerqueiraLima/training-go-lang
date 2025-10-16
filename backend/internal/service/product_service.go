@@ -49,12 +49,12 @@ func (s *ProductService) FindById(id int) (dto.ProductOut, error) {
 	return result, err
 }
 
-func (s *ProductService) DeleteProduct(id int) (int, error) {
+func (s *ProductService) DeleteProduct(id int) (bool, error) {
 	repository := *s.rep
 
 	if err := repository.Delete(uint32(id)); err != nil {
-		return 0, err
+		return false, err
 	}
 
-	return id, nil
+	return true, nil
 }
